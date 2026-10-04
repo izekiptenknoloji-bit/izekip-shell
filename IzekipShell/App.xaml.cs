@@ -102,6 +102,7 @@ public partial class App : Application
 
         _ = AppCatalog.LoadAsync();
         ListenForQuit();
+        StartUpdateChecks();
     }
 
     // FindAll'in donen listesi foreach ile gezilince bazi surumlerde patliyor; dizinle gezilir.
@@ -124,6 +125,15 @@ public partial class App : Application
         Interop.Native.GetCursorPos(out var p);
         return Taskbars.FirstOrDefault(b => p.X >= b.Monitor.X && p.X < b.Monitor.X + b.Monitor.Width
                                          && p.Y >= b.Monitor.Y && p.Y < b.Monitor.Y + b.Monitor.Height) ?? Taskbars[0];
+    }
+
+    // Ilk denetim hemen, sonra her birkac saatte bir tekrar edilir.
+    void StartUpdateChecks()
+    {
+        var timer = UI.CreateTimer();
+        timer.Interval = TimeSpan.FromHours(3);
+        timer.Tick += (_, _) => WindowsUpdate.RefreshAsync();
+        timer.Start();
     }
 
     public bool IsDesktopWindow(IntPtr h) => Desktops.Any(d => d.Hwnd == h);

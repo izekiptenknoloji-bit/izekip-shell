@@ -26,6 +26,7 @@ public sealed partial class PanelWindow : Window
             Update();
             _timer.Start();
         };
+        WindowsUpdate.Changed += () => DispatcherQueue.TryEnqueue(Update);
 
         _timer = DispatcherQueue.CreateTimer();
         _timer.Interval = TimeSpan.FromSeconds(1);
@@ -72,6 +73,31 @@ public sealed partial class PanelWindow : Window
             BatteryIcon.Glyph = battery.Glyph;
             BatteryText.Text = battery.Text;
         }
+
+        UpdateText.Text = WindowsUpdate.Summary;
+        UpdateIcon.Glyph = WindowsUpdate.State switch
+        {
+            UpdateState.RebootRequired => "",
+            UpdateState.Available => "",
+            UpdateState.Checking => "",
+            _ => "",
+        };
+        UpdateIcon.Foreground = WindowsUpdate.State is UpdateState.Available or UpdateState.RebootRequired
+            ? (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["SystemFillColorCautionBrush"]
+            : (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorPrimaryBrush"];
+        UpdateRefresh.IsEnabled = WindowsUpdate.State != UpdateState.Checking;
+    }
+
+    void UpdateRow_Click(object sender, RoutedEventArgs e)
+    {
+        _popup.Hide();
+        AppCatalog.Open("ms-settings:windowsupdate");
+    }
+
+    void UpdateRefresh_Click(object sender, RoutedEventArgs e)
+    {
+        WindowsUpdate.RefreshAsync();
+        Update();
     }
 
     // ---- Wi-Fi ----

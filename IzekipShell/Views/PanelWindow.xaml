@@ -126,6 +126,41 @@
                             <FontIcon x:Name="BatteryIcon" FontSize="16" />
                             <TextBlock x:Name="BatteryText" Grid.Column="1" />
                         </Grid>
+
+                        <!--  Windows Update  -->
+                        <Button
+                            Padding="0"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Click="UpdateRow_Click"
+                            Style="{StaticResource TaskButtonStyle}">
+                            <Grid ColumnSpacing="14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <FontIcon x:Name="UpdateIcon" FontSize="16" Glyph="&#xE895;" />
+                                <TextBlock
+                                    x:Name="UpdateText"
+                                    Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    TextTrimming="CharacterEllipsis" />
+                                <Button
+                                    x:Name="UpdateRefresh"
+                                    Grid.Column="2"
+                                    Width="28"
+                                    Height="28"
+                                    Padding="0"
+                                    Click="UpdateRefresh_Click"
+                                    Style="{StaticResource TaskButtonStyle}"
+                                    ToolTipService.ToolTip="Şimdi denetle">
+                                    <FontIcon FontSize="12" Glyph="&#xE72C;" />
+                                </Button>
+                            </Grid>
+                        </Button>
                     </StackPanel>
                 </Border>
 

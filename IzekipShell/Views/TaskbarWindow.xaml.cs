@@ -66,6 +66,7 @@ public sealed partial class TaskbarWindow : Window
 
         AppCatalog.Changed += Refresh;
         ShellSettings.Changed += Refresh;
+        WindowsUpdate.Changed += () => DispatcherQueue.TryEnqueue(() => UpdateTray(force: true));
     }
 
     public void ShowBar()
@@ -88,6 +89,7 @@ public sealed partial class TaskbarWindow : Window
         Refresh();
         _poll.Start();
         _clock.Start();
+        if (WindowsUpdate.State == UpdateState.Unknown) WindowsUpdate.RefreshAsync();
     }
 
     void Position()
@@ -370,6 +372,12 @@ public sealed partial class TaskbarWindow : Window
             BatteryGlyph.Glyph = battery.Glyph;
             ToolTipService.SetToolTip(BatteryGlyph, battery.Text);
         }
+
+        bool needsAttention = WindowsUpdate.State is UpdateState.Available or UpdateState.RebootRequired;
+        UpdateIndicator.Visibility = needsAttention ? Visibility.Visible : Visibility.Collapsed;
+        UpdateBadge.Fill = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources[WindowsUpdate.State == UpdateState.RebootRequired
+            ? "SystemFillColorCriticalBrush" : "SystemFillColorCautionBrush"];
+        ToolTipService.SetToolTip(UpdateIndicator, WindowsUpdate.Summary);
     }
 
     // Gorev cubugu 48 DIP; menuler pencere disina tasabilmeli.

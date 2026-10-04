@@ -177,6 +177,23 @@
                 PointerWheelChanged="Tray_PointerWheelChanged"
                 Style="{StaticResource TaskButtonStyle}">
                 <StackPanel Orientation="Horizontal" Spacing="14">
+                    <Grid
+                        x:Name="UpdateIndicator"
+                        Width="15"
+                        Height="15"
+                        Visibility="Collapsed">
+                        <FontIcon FontSize="15" Glyph="&#xE895;" />
+                        <Ellipse
+                            x:Name="UpdateBadge"
+                            Width="7"
+                            Height="7"
+                            Margin="0,0,-2,-2"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            Fill="{ThemeResource SystemFillColorCriticalBrush}"
+                            Stroke="{ThemeResource SolidBackgroundFillColorBaseBrush}"
+                            StrokeThickness="1.5" />
+                    </Grid>
                     <FontIcon x:Name="NetGlyph" FontSize="15" Glyph="&#xE701;" />
                     <FontIcon x:Name="VolumeGlyph" FontSize="15" Glyph="&#xE995;" />
                     <FontIcon
