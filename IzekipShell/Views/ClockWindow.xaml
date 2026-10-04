@@ -1,0 +1,87 @@
+<Window
+    x:Class="IzekipShell.Views.ClockWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--  Saat paneli: buyuk saat, takvim ve odak zamanlayicisi  -->
+    <Grid x:Name="Root" KeyDown="Root_KeyDown">
+        <StackPanel Padding="24,22,24,24" Spacing="16">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <TextBlock
+                        x:Name="BigTime"
+                        FontSize="52"
+                        FontWeight="SemiBold"
+                        Text="00:00" />
+                    <TextBlock
+                        x:Name="Seconds"
+                        Margin="0,0,0,10"
+                        VerticalAlignment="Bottom"
+                        FontSize="22"
+                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                        Text="00" />
+                </StackPanel>
+                <TextBlock
+                    x:Name="LongDate"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource BodyStrongTextBlockStyle}" />
+            </StackPanel>
+
+            <CalendarView
+                x:Name="Calendar"
+                HorizontalAlignment="Stretch"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                CornerRadius="10"
+                FirstDayOfWeek="Monday"
+                IsTodayHighlighted="True"
+                Language="tr-TR"
+                SelectionMode="None" />
+
+            <!--  Odak zamanlayicisi  -->
+            <Border
+                Padding="16,14"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="10">
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid Width="64" Height="64">
+                        <ProgressRing
+                            x:Name="FocusRing"
+                            Width="64"
+                            Height="64"
+                            Background="{ThemeResource ControlStrokeColorDefaultBrush}"
+                            IsIndeterminate="False"
+                            Maximum="1" />
+                        <FontIcon
+                            x:Name="FocusIcon"
+                            FontSize="20"
+                            Glyph="&#xE916;" />
+                    </Grid>
+                    <StackPanel
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Spacing="8">
+                        <TextBlock x:Name="FocusTitle" Style="{StaticResource BodyStrongTextBlockStyle}" Text="Odak zamanlayıcısı" />
+                        <StackPanel x:Name="FocusChoices" Orientation="Horizontal" Spacing="6">
+                            <Button Padding="9,4" Click="Focus_Click" Content="5 dk" Tag="5" />
+                            <Button Padding="9,4" Click="Focus_Click" Content="15 dk" Tag="15" />
+                            <Button Padding="9,4" Click="Focus_Click" Content="25 dk" Tag="25" />
+                            <Button Padding="9,4" Click="Focus_Click" Content="45 dk" Tag="45" />
+                        </StackPanel>
+                        <Button
+                            x:Name="FocusStop"
+                            Click="FocusStop_Click"
+                            Content="Durdur"
+                            Visibility="Collapsed" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </Grid>
+</Window>

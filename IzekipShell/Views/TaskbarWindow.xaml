@@ -1,0 +1,222 @@
+<Window
+    x:Class="IzekipShell.Views.TaskbarWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:m="using:IzekipShell.Models">
+
+    <Grid
+        x:Name="Root"
+        Background="Transparent"
+        RightTapped="Root_RightTapped">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <!--  Baslat + arama  -->
+        <StackPanel
+            Padding="6,0,0,0"
+            VerticalAlignment="Center"
+            Orientation="Horizontal"
+            Spacing="2">
+            <Button
+                x:Name="StartButton"
+                Width="44"
+                Height="40"
+                Padding="0"
+                Click="Start_Click"
+                Style="{StaticResource TaskButtonStyle}"
+                ToolTipService.ToolTip="Başlat">
+                <Grid Width="22" Height="22" ColumnSpacing="1.6" RowSpacing="1.6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Rectangle Grid.Row="0" Grid.Column="0" RadiusX="1" RadiusY="1">
+                            <Rectangle.Fill>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Offset="0" Color="#FF5ED0FF" />
+                                    <GradientStop Offset="1" Color="#FF0A74DA" />
+                                </LinearGradientBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                        <Rectangle Grid.Row="0" Grid.Column="1" RadiusX="1" RadiusY="1">
+                            <Rectangle.Fill>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Offset="0" Color="#FF5ED0FF" />
+                                    <GradientStop Offset="1" Color="#FF0A74DA" />
+                                </LinearGradientBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                        <Rectangle Grid.Row="1" Grid.Column="0" RadiusX="1" RadiusY="1">
+                            <Rectangle.Fill>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Offset="0" Color="#FF5ED0FF" />
+                                    <GradientStop Offset="1" Color="#FF0A74DA" />
+                                </LinearGradientBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                        <Rectangle Grid.Row="1" Grid.Column="1" RadiusX="1" RadiusY="1">
+                            <Rectangle.Fill>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Offset="0" Color="#FF5ED0FF" />
+                                    <GradientStop Offset="1" Color="#FF0A74DA" />
+                                </LinearGradientBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </Grid>
+            </Button>
+            <!--  Arama kutusu: tiklayinca arama penceresi acilir  -->
+            <Button
+                x:Name="SearchPill"
+                Width="230"
+                Height="34"
+                Margin="4,0"
+                Padding="14,0"
+                HorizontalContentAlignment="Left"
+                Background="{ThemeResource ControlFillColorDefaultBrush}"
+                Click="Search_Click"
+                CornerRadius="17"
+                Style="{StaticResource TaskButtonStyle}"
+                ToolTipService.ToolTip="Ara (Win + S)">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <FontIcon FontSize="14" Glyph="&#xE721;">
+                        <FontIcon.Foreground>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Offset="0" Color="#FF8B5CF6" />
+                                <GradientStop Offset="1" Color="#FF06B6D4" />
+                            </LinearGradientBrush>
+                        </FontIcon.Foreground>
+                    </FontIcon>
+                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Ara" />
+                </StackPanel>
+            </Button>
+            <Rectangle
+                Width="1"
+                Height="24"
+                Margin="6,0"
+                Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
+        </StackPanel>
+
+        <!--  Sabitlenenler ve acik pencereler  -->
+        <ItemsControl
+            x:Name="TaskItems"
+            Grid.Column="1"
+            VerticalAlignment="Center">
+            <!--  Ikon eklenince belirir, kalkinca digerleri yumusakca kayar  -->
+            <ItemsControl.ItemContainerTransitions>
+                <TransitionCollection>
+                    <AddDeleteThemeTransition />
+                    <RepositionThemeTransition />
+                </TransitionCollection>
+            </ItemsControl.ItemContainerTransitions>
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" Spacing="2" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="m:TaskItem">
+                    <Button
+                        Width="44"
+                        Height="40"
+                        Padding="0"
+                        Click="TaskItem_Click"
+                        RightTapped="TaskItem_RightTapped"
+                        Style="{StaticResource TaskButtonStyle}"
+                        ToolTipService.ToolTip="{x:Bind Tooltip, Mode=OneWay}">
+                        <Grid Width="44" Height="40">
+                            <Border
+                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                CornerRadius="6"
+                                Visibility="{x:Bind IsActive, Mode=OneWay}" />
+                            <Image
+                                Width="24"
+                                Height="24"
+                                Source="{x:Bind Icon, Mode=OneWay}" />
+                            <Rectangle
+                                Width="6"
+                                Height="3"
+                                Margin="0,0,0,2"
+                                VerticalAlignment="Bottom"
+                                Fill="{ThemeResource TextFillColorTertiaryBrush}"
+                                RadiusX="1.5"
+                                RadiusY="1.5"
+                                Visibility="{x:Bind ShowIdleIndicator, Mode=OneWay}" />
+                            <Rectangle
+                                Width="16"
+                                Height="3"
+                                Margin="0,0,0,2"
+                                VerticalAlignment="Bottom"
+                                Fill="{ThemeResource AccentFillColorDefaultBrush}"
+                                RadiusX="1.5"
+                                RadiusY="1.5"
+                                Visibility="{x:Bind IsActive, Mode=OneWay}" />
+                        </Grid>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!--  Bildirim alani: ag, ses, pil, saat, masaustunu goster  -->
+        <StackPanel
+            Grid.Column="2"
+            VerticalAlignment="Center"
+            Orientation="Horizontal"
+            Spacing="2">
+            <Button
+                x:Name="TrayButton"
+                Height="40"
+                Padding="12,0"
+                Click="Panel_Click"
+                PointerWheelChanged="Tray_PointerWheelChanged"
+                Style="{StaticResource TaskButtonStyle}">
+                <StackPanel Orientation="Horizontal" Spacing="14">
+                    <FontIcon x:Name="NetGlyph" FontSize="15" Glyph="&#xE701;" />
+                    <FontIcon x:Name="VolumeGlyph" FontSize="15" Glyph="&#xE995;" />
+                    <FontIcon
+                        x:Name="BatteryGlyph"
+                        FontSize="15"
+                        Glyph="&#xEBAA;"
+                        Visibility="Collapsed" />
+                </StackPanel>
+            </Button>
+            <Button
+                x:Name="ClockButton"
+                Height="40"
+                Padding="10,0"
+                Click="Clock_Click"
+                Style="{StaticResource TaskButtonStyle}">
+                <StackPanel>
+                    <TextBlock
+                        x:Name="TimeText"
+                        HorizontalAlignment="Right"
+                        FontSize="12" />
+                    <TextBlock
+                        x:Name="DateText"
+                        HorizontalAlignment="Right"
+                        FontSize="12" />
+                </StackPanel>
+            </Button>
+            <Grid
+                Width="14"
+                Height="48"
+                Background="Transparent"
+                PointerEntered="ShowDesktop_PointerEntered"
+                PointerExited="ShowDesktop_PointerExited"
+                Tapped="ShowDesktop_Tapped"
+                ToolTipService.ToolTip="Masaüstünü göster">
+                <Rectangle
+                    x:Name="ShowDesktopLine"
+                    Width="1"
+                    Height="20"
+                    Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
+            </Grid>
+        </StackPanel>
+    </Grid>
+</Window>

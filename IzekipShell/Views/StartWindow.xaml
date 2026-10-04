@@ -1,0 +1,571 @@
+<Window
+    x:Class="IzekipShell.Views.StartWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:m="using:IzekipShell.Models">
+
+    <Grid
+        x:Name="Root"
+        BorderBrush="{ThemeResource SurfaceStrokeColorFlyoutBrush}"
+        BorderThickness="1"
+        CornerRadius="8"
+        CharacterReceived="Root_CharacterReceived"
+        KeyDown="Root_KeyDown">
+        <Grid.Resources>
+            <CollectionViewSource x:Key="AppsSource" IsSourceGrouped="True" />
+
+            <!--  Sabitlenen uygulama karti  -->
+            <DataTemplate x:Key="CardTemplate" x:DataType="m:AppEntry">
+                <Grid
+                    Width="108"
+                    Height="100"
+                    Padding="6,14,6,8"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    RowSpacing="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Width="36" Height="36">
+                        <FontIcon
+                            FontSize="26"
+                            Glyph="{x:Bind Glyph}"
+                            Visibility="{x:Bind HasNoIcon, Mode=OneWay}" />
+                        <Image Source="{x:Bind Icon, Mode=OneWay}" />
+                    </Grid>
+                    <TextBlock
+                        Grid.Row="1"
+                        FontSize="12"
+                        MaxLines="2"
+                        Text="{x:Bind Name}"
+                        TextAlignment="Center"
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="Wrap" />
+                </Grid>
+            </DataTemplate>
+
+            <!--  Liste satiri: tum uygulamalar ve dosyalar  -->
+            <DataTemplate x:Key="RowTemplate" x:DataType="m:AppEntry">
+                <Grid Height="46" ColumnSpacing="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="28" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid Width="28" Height="28">
+                        <FontIcon
+                            FontSize="20"
+                            Glyph="{x:Bind Glyph}"
+                            Visibility="{x:Bind HasNoIcon, Mode=OneWay}" />
+                        <Image Source="{x:Bind Icon, Mode=OneWay}" />
+                    </Grid>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="{x:Bind Name}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock
+                            FontSize="12"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind Subtitle}"
+                            TextTrimming="CharacterEllipsis"
+                            Visibility="{x:Bind HasSubtitle}" />
+                    </StackPanel>
+                </Grid>
+            </DataTemplate>
+
+            <Style x:Key="RailButton" BasedOn="{StaticResource TaskButtonStyle}" TargetType="Button">
+                <Setter Property="Width" Value="48" />
+                <Setter Property="Height" Value="48" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="CornerRadius" Value="10" />
+            </Style>
+
+            <Style x:Key="WidgetCard" TargetType="Border">
+                <Setter Property="Padding" Value="16,14" />
+                <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="12" />
+            </Style>
+        </Grid.Resources>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="72" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="300" />
+        </Grid.ColumnDefinitions>
+
+        <!--  Sol ray  -->
+        <Grid
+            Padding="0,18,0,14"
+            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+            RowSpacing="6">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <PersonPicture
+                x:Name="UserPicture"
+                Width="40"
+                Height="40"
+                HorizontalAlignment="Center"
+                ToolTipService.ToolTip="Hesap ayarları"
+                Tapped="User_Tapped" />
+            <StackPanel
+                Grid.Row="1"
+                Margin="0,18,0,0"
+                HorizontalAlignment="Center"
+                Spacing="6">
+                <Grid>
+                    <Button
+                        x:Name="HomeTab"
+                        Click="Tab_Click"
+                        Style="{StaticResource RailButton}"
+                        Tag="home"
+                        ToolTipService.ToolTip="Ana sayfa">
+                        <FontIcon FontSize="18" Glyph="&#xE80F;" />
+                    </Button>
+                </Grid>
+                <Button
+                    x:Name="AppsTab"
+                    Click="Tab_Click"
+                    Style="{StaticResource RailButton}"
+                    Tag="apps"
+                    ToolTipService.ToolTip="Tüm uygulamalar">
+                    <FontIcon FontSize="18" Glyph="&#xE71D;" />
+                </Button>
+                <Button
+                    x:Name="FilesTab"
+                    Click="Tab_Click"
+                    Style="{StaticResource RailButton}"
+                    Tag="files"
+                    ToolTipService.ToolTip="Dosyalar">
+                    <FontIcon FontSize="18" Glyph="&#xE8B7;" />
+                </Button>
+            </StackPanel>
+            <!--  Secili sekme isareti: sekmeler arasinda kayar  -->
+            <Rectangle
+                x:Name="TabIndicator"
+                Grid.Row="1"
+                Width="3"
+                Height="18"
+                Margin="4,0,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Fill="{ThemeResource AccentFillColorDefaultBrush}"
+                RadiusX="1.5"
+                RadiusY="1.5">
+                <Rectangle.RenderTransform>
+                    <TranslateTransform x:Name="IndicatorMove" Y="33" />
+                </Rectangle.RenderTransform>
+            </Rectangle>
+            <StackPanel
+                Grid.Row="2"
+                HorizontalAlignment="Center"
+                Spacing="6">
+                <Button
+                    Click="Settings_Click"
+                    Style="{StaticResource RailButton}"
+                    ToolTipService.ToolTip="Ayarlar">
+                    <FontIcon FontSize="18" Glyph="&#xE713;" />
+                </Button>
+                <Button Style="{StaticResource RailButton}" ToolTipService.ToolTip="Güç">
+                    <FontIcon FontSize="18" Glyph="&#xE7E8;" />
+                    <Button.Flyout>
+                        <MenuFlyout Placement="RightEdgeAlignedBottom">
+                            <MenuFlyoutItem Click="Lock_Click" Text="Kilitle">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE72E;" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Click="SignOut_Click" Text="Oturumu kapat">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xF3B1;" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutSeparator />
+                            <MenuFlyoutItem Click="Sleep_Click" Text="Uyku">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE708;" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Click="Restart_Click" Text="Yeniden başlat">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE777;" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Click="Shutdown_Click" Text="Bilgisayarı kapat">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE7E8;" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutSeparator />
+                            <MenuFlyoutItem Click="Quit_Click" Text="Kabuktan çık (Windows'a dön)">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE89F;" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                        </MenuFlyout>
+                    </Button.Flyout>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!--  Orta: icerik  -->
+        <Grid
+            Grid.Column="1"
+            Padding="28,24,16,18"
+            RowSpacing="16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!--  Selamlama + arama dugmesi  -->
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock
+                        x:Name="Greeting"
+                        FontSize="26"
+                        FontWeight="SemiBold"
+                        TextTrimming="CharacterEllipsis" />
+                    <TextBlock
+                        x:Name="Today"
+                        Margin="0,2,0,0"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+                <Button
+                    Grid.Column="1"
+                    Height="38"
+                    Padding="14,0"
+                    VerticalAlignment="Center"
+                    Background="{ThemeResource ControlFillColorDefaultBrush}"
+                    Click="Search_Click"
+                    CornerRadius="19"
+                    Style="{StaticResource TaskButtonStyle}"
+                    ToolTipService.ToolTip="Yazmaya başlaman yeterli">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <FontIcon FontSize="14" Glyph="&#xE721;" />
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Ara" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+
+            <!--  Ana sayfa  -->
+            <ScrollViewer
+                x:Name="HomeView"
+                Grid.Row="1"
+                Margin="0,0,-12,0"
+                Padding="0,0,12,0"
+                VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="12">
+                    <TextBlock Style="{StaticResource SectionTitle}" Text="Sabitlenenler" />
+                    <GridView
+                        x:Name="PinnedGrid"
+                        Margin="-4,0"
+                        ContainerContentChanging="Entries_ContainerContentChanging"
+                        IsItemClickEnabled="True"
+                        ItemClick="Entry_ItemClick"
+                        ItemTemplate="{StaticResource CardTemplate}"
+                        RightTapped="Entry_RightTapped"
+                        ScrollViewer.VerticalScrollMode="Disabled"
+                        SelectionMode="None">
+                        <GridView.ItemContainerTransitions>
+                            <TransitionCollection>
+                                <EntranceThemeTransition FromVerticalOffset="40" IsStaggeringEnabled="True" />
+                            </TransitionCollection>
+                        </GridView.ItemContainerTransitions>
+                    </GridView>
+
+                    <StackPanel x:Name="FrequentSection" Spacing="10">
+                        <TextBlock Style="{StaticResource SectionTitle}" Text="Sık kullandıkların" />
+                        <ItemsControl x:Name="FrequentList">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemContainerTransitions>
+                                <TransitionCollection>
+                                    <EntranceThemeTransition FromHorizontalOffset="40" IsStaggeringEnabled="True" />
+                                </TransitionCollection>
+                            </ItemsControl.ItemContainerTransitions>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="m:AppEntry">
+                                    <Button
+                                        Height="40"
+                                        Padding="10,0,14,0"
+                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                        Click="Frequent_Click"
+                                        CornerRadius="20"
+                                        Style="{StaticResource TaskButtonStyle}">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <Image
+                                                Width="22"
+                                                Height="22"
+                                                Source="{x:Bind Icon, Mode=OneWay}" />
+                                            <TextBlock
+                                                MaxWidth="110"
+                                                VerticalAlignment="Center"
+                                                Text="{x:Bind Name}"
+                                                TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <TextBlock Style="{StaticResource SectionTitle}" Text="Kaldığın yerden devam et" />
+                    <GridView
+                        x:Name="RecentGrid"
+                        Margin="-4,0"
+                        ContainerContentChanging="Entries_ContainerContentChanging"
+                        IsItemClickEnabled="True"
+                        ItemClick="Entry_ItemClick"
+                        ScrollViewer.VerticalScrollMode="Disabled"
+                        SelectionMode="None">
+                        <GridView.ItemContainerTransitions>
+                            <TransitionCollection>
+                                <EntranceThemeTransition FromVerticalOffset="30" IsStaggeringEnabled="True" />
+                            </TransitionCollection>
+                        </GridView.ItemContainerTransitions>
+                        <GridView.ItemTemplate>
+                            <DataTemplate x:DataType="m:AppEntry">
+                                <Grid
+                                    Width="236"
+                                    Height="56"
+                                    Padding="12,0"
+                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1"
+                                    ColumnSpacing="12"
+                                    CornerRadius="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="28" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid Width="28" Height="28">
+                                        <FontIcon
+                                            FontSize="20"
+                                            Glyph="{x:Bind Glyph}"
+                                            Visibility="{x:Bind HasNoIcon, Mode=OneWay}" />
+                                        <Image Source="{x:Bind Icon, Mode=OneWay}" />
+                                    </Grid>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Bind Name}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock
+                                            FontSize="12"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Text="{x:Bind Subtitle}" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </GridView.ItemTemplate>
+                    </GridView>
+                    <TextBlock
+                        x:Name="NoRecentText"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="Açtığın dosyalar burada görünecek."
+                        Visibility="Collapsed" />
+                </StackPanel>
+            </ScrollViewer>
+
+            <!--  Tum uygulamalar  -->
+            <ListView
+                x:Name="AllList"
+                Grid.Row="1"
+                Margin="-12,0,0,0"
+                ContainerContentChanging="Entries_ContainerContentChanging"
+                IsItemClickEnabled="True"
+                ItemClick="Entry_ItemClick"
+                ItemTemplate="{StaticResource RowTemplate}"
+                RightTapped="Entry_RightTapped"
+                SelectionMode="None"
+                Visibility="Collapsed">
+                <ListView.GroupStyle>
+                    <GroupStyle HidesIfEmpty="True">
+                        <GroupStyle.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                    Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                    Text="{Binding Key}" />
+                            </DataTemplate>
+                        </GroupStyle.HeaderTemplate>
+                    </GroupStyle>
+                </ListView.GroupStyle>
+            </ListView>
+
+            <!--  Dosyalar: klasorler + son dosyalarin tamami  -->
+            <Grid
+                x:Name="FilesView"
+                Grid.Row="1"
+                RowSpacing="12"
+                Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Style="{StaticResource SectionTitle}" Text="Klasörler" />
+                <VariableSizedWrapGrid
+                    x:Name="FolderButtons"
+                    Grid.Row="1"
+                    ItemHeight="48"
+                    ItemWidth="164"
+                    Orientation="Horizontal" />
+                <TextBlock
+                    Grid.Row="2"
+                    Style="{StaticResource SectionTitle}"
+                    Text="Son dosyalar" />
+                <ListView
+                    x:Name="AllRecentList"
+                    Grid.Row="3"
+                    Margin="-12,0,0,0"
+                    ContainerContentChanging="Entries_ContainerContentChanging"
+                    IsItemClickEnabled="True"
+                    ItemClick="Entry_ItemClick"
+                    ItemTemplate="{StaticResource RowTemplate}"
+                    SelectionMode="None" />
+            </Grid>
+        </Grid>
+
+        <!--  Sag: widget'lar  -->
+        <StackPanel
+            Grid.Column="2"
+            Padding="0,24,24,18"
+            Spacing="12">
+            <Border Style="{StaticResource WidgetCard}">
+                <StackPanel Spacing="12">
+                    <TextBlock Style="{StaticResource SectionTitle}" Text="Sistem" />
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Spacing="6">
+                            <Grid Width="58" Height="58">
+                                <ProgressRing
+                                    x:Name="CpuRing"
+                                    Width="58"
+                                    Height="58"
+                                    Background="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                    IsIndeterminate="False" />
+                                <TextBlock
+                                    x:Name="CpuText"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    FontSize="12"
+                                    FontWeight="SemiBold" />
+                            </Grid>
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                FontSize="12"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="İşlemci" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Spacing="6">
+                            <Grid Width="58" Height="58">
+                                <ProgressRing
+                                    x:Name="RamRing"
+                                    Width="58"
+                                    Height="58"
+                                    Background="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                    IsIndeterminate="False" />
+                                <TextBlock
+                                    x:Name="RamText"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    FontSize="12"
+                                    FontWeight="SemiBold" />
+                            </Grid>
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                FontSize="12"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="Bellek" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Spacing="6">
+                            <Grid Width="58" Height="58">
+                                <ProgressRing
+                                    x:Name="DiskRing"
+                                    Width="58"
+                                    Height="58"
+                                    Background="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                    IsIndeterminate="False" />
+                                <TextBlock
+                                    x:Name="DiskText"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    FontSize="12"
+                                    FontWeight="SemiBold" />
+                            </Grid>
+                            <TextBlock
+                                x:Name="DiskLabel"
+                                HorizontalAlignment="Center"
+                                FontSize="12"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="C: diski" />
+                        </StackPanel>
+                    </Grid>
+                    <TextBlock
+                        x:Name="UptimeText"
+                        FontSize="12"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource WidgetCard}">
+                <StackPanel Spacing="10">
+                    <Grid>
+                        <TextBlock Style="{StaticResource SectionTitle}" Text="Hızlı not" />
+                        <TextBlock
+                            x:Name="NoteSaved"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            FontSize="11"
+                            Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                    </Grid>
+                    <TextBox
+                        x:Name="NoteBox"
+                        Height="150"
+                        AcceptsReturn="True"
+                        PlaceholderText="Aklına geleni yaz, otomatik kaydedilir…"
+                        TextChanged="Note_TextChanged"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource WidgetCard}">
+                <Grid ColumnSpacing="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <FontIcon
+                        x:Name="ClipboardGlyph"
+                        FontSize="18"
+                        Glyph="&#xE77F;" />
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Pano" />
+                        <TextBlock
+                            x:Name="ClipboardText"
+                            FontSize="12"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            MaxLines="2"
+                            TextTrimming="CharacterEllipsis"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </Grid>
+</Window>

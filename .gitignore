@@ -1,0 +1,9 @@
+# .NET / Visual Studio
+bin/
+obj/
+*.user
+.vs/
+
+# Derleme ve test ciktilari
+*.log
+*.pdb

@@ -1,0 +1,287 @@
+<Window
+    x:Class="IzekipShell.Views.SearchWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:m="using:IzekipShell.Models">
+
+    <Grid x:Name="Root" KeyDown="Root_KeyDown">
+        <Grid.Resources>
+            <CollectionViewSource x:Key="ResultsSource" IsSourceGrouped="True" />
+
+            <LinearGradientBrush x:Key="GlowBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Offset="0" Color="#FF8B5CF6" />
+                <GradientStop Offset="0.55" Color="#FF3B82F6" />
+                <GradientStop Offset="1" Color="#FF06B6D4" />
+            </LinearGradientBrush>
+
+            <DataTemplate x:Key="ResultTemplate" x:DataType="m:AppEntry">
+                <Grid Height="48" ColumnSpacing="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="28" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid Width="28" Height="28">
+                        <FontIcon
+                            FontSize="20"
+                            Glyph="{x:Bind Glyph}"
+                            Visibility="{x:Bind HasNoIcon, Mode=OneWay}" />
+                        <Image Source="{x:Bind Icon, Mode=OneWay}" />
+                    </Grid>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="{x:Bind Name}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock
+                            FontSize="12"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind Subtitle}"
+                            TextTrimming="CharacterEllipsis"
+                            Visibility="{x:Bind HasSubtitle}" />
+                    </StackPanel>
+                </Grid>
+            </DataTemplate>
+        </Grid.Resources>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!--  Isiltili arama kutusu  -->
+        <Grid Padding="28,26,28,10">
+            <Border
+                Height="54"
+                Background="{ThemeResource ControlFillColorDefaultBrush}"
+                BorderBrush="{StaticResource GlowBrush}"
+                BorderThickness="2"
+                CornerRadius="27">
+                <Grid Padding="20,0,12,0" ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <FontIcon
+                        FontSize="18"
+                        Foreground="{StaticResource GlowBrush}"
+                        Glyph="&#xE721;" />
+                    <TextBox
+                        x:Name="QueryBox"
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        FontSize="17"
+                        KeyDown="Query_KeyDown"
+                        PlaceholderText="Ne arıyorsun? Uygulama, dosya, ayar, hesap…"
+                        TextChanged="Query_TextChanged">
+                        <TextBox.Resources>
+                            <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent" />
+                            <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
+                            <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
+                            <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="Transparent" />
+                            <SolidColorBrush x:Key="TextControlBorderBrush" Color="Transparent" />
+                        </TextBox.Resources>
+                    </TextBox>
+                    <Border
+                        Grid.Column="2"
+                        Padding="8,3"
+                        VerticalAlignment="Center"
+                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                        CornerRadius="6">
+                        <TextBlock
+                            FontSize="11"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="Win + S" />
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <SelectorBar
+            x:Name="Filters"
+            Grid.Row="1"
+            Margin="24,0,24,4"
+            SelectionChanged="Filters_SelectionChanged">
+            <SelectorBarItem IsSelected="True" Tag="all" Text="Tümü">
+                <SelectorBarItem.Icon>
+                    <FontIcon Glyph="&#xE71D;" />
+                </SelectorBarItem.Icon>
+            </SelectorBarItem>
+            <SelectorBarItem Tag="Uygulamalar" Text="Uygulamalar">
+                <SelectorBarItem.Icon>
+                    <FontIcon Glyph="&#xE74C;" />
+                </SelectorBarItem.Icon>
+            </SelectorBarItem>
+            <SelectorBarItem Tag="Dosyalar" Text="Dosyalar">
+                <SelectorBarItem.Icon>
+                    <FontIcon Glyph="&#xE8A5;" />
+                </SelectorBarItem.Icon>
+            </SelectorBarItem>
+            <SelectorBarItem Tag="Ayarlar" Text="Ayarlar">
+                <SelectorBarItem.Icon>
+                    <FontIcon Glyph="&#xE713;" />
+                </SelectorBarItem.Icon>
+            </SelectorBarItem>
+            <SelectorBarItem Tag="Web" Text="Web">
+                <SelectorBarItem.Icon>
+                    <FontIcon Glyph="&#xE774;" />
+                </SelectorBarItem.Icon>
+            </SelectorBarItem>
+        </SelectorBar>
+
+        <Grid
+            Grid.Row="2"
+            Padding="24,4,24,24"
+            ColumnSpacing="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="380" />
+            </Grid.ColumnDefinitions>
+
+            <!--  Bos durum: oneriler ve hizli islemler  -->
+            <ScrollViewer x:Name="HomePanel" VerticalScrollBarVisibility="Auto">
+                <StackPanel Padding="4,8,4,0" Spacing="10">
+                    <TextBlock Style="{StaticResource SectionTitle}" Text="Önerilen uygulamalar" />
+                    <GridView
+                        x:Name="SuggestedGrid"
+                        Margin="-6,0"
+                        ContainerContentChanging="Entries_ContainerContentChanging"
+                        IsItemClickEnabled="True"
+                        ItemClick="Entry_ItemClick"
+                        SelectionMode="None">
+                        <GridView.ItemTemplate>
+                            <DataTemplate x:DataType="m:AppEntry">
+                                <StackPanel
+                                    Width="86"
+                                    Height="82"
+                                    Padding="4,10,4,4"
+                                    Spacing="8">
+                                    <Grid Width="32" Height="32">
+                                        <FontIcon
+                                            FontSize="24"
+                                            Glyph="{x:Bind Glyph}"
+                                            Visibility="{x:Bind HasNoIcon, Mode=OneWay}" />
+                                        <Image Source="{x:Bind Icon, Mode=OneWay}" />
+                                    </Grid>
+                                    <TextBlock
+                                        FontSize="12"
+                                        Text="{x:Bind Name}"
+                                        TextAlignment="Center"
+                                        TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridView.ItemTemplate>
+                    </GridView>
+
+                    <TextBlock
+                        Margin="0,6,0,0"
+                        Style="{StaticResource SectionTitle}"
+                        Text="Hızlı işlemler" />
+                    <VariableSizedWrapGrid
+                        x:Name="QuickActions"
+                        ItemHeight="44"
+                        ItemWidth="168"
+                        Orientation="Horizontal" />
+                </StackPanel>
+            </ScrollViewer>
+
+            <!--  Sonuclar  -->
+            <Grid x:Name="ResultsPanel" Visibility="Collapsed">
+                <ListView
+                    x:Name="ResultsList"
+                    Margin="-8,0,0,0"
+                    ContainerContentChanging="Entries_ContainerContentChanging"
+                    IsItemClickEnabled="True"
+                    ItemClick="Entry_ItemClick"
+                    ItemTemplate="{StaticResource ResultTemplate}"
+                    KeyDown="Results_KeyDown"
+                    SelectionChanged="Results_SelectionChanged"
+                    SelectionMode="Single">
+                    <ListView.GroupStyle>
+                        <GroupStyle HidesIfEmpty="True">
+                            <GroupStyle.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock
+                                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                        Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                        Text="{Binding Key}" />
+                                </DataTemplate>
+                            </GroupStyle.HeaderTemplate>
+                        </GroupStyle>
+                    </ListView.GroupStyle>
+                </ListView>
+                <StackPanel
+                    x:Name="NothingFound"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Spacing="8"
+                    Visibility="Collapsed">
+                    <FontIcon
+                        FontSize="40"
+                        Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                        Glyph="&#xE721;" />
+                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Bu sekmede sonuç yok" />
+                </StackPanel>
+            </Grid>
+
+            <!--  Onizleme karti  -->
+            <Border
+                x:Name="PreviewCard"
+                Grid.Column="1"
+                Padding="20,24"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="12">
+                <Grid RowSpacing="14">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <StackPanel HorizontalAlignment="Center" Spacing="6">
+                        <Grid
+                            Width="72"
+                            Height="72"
+                            HorizontalAlignment="Center">
+                            <FontIcon
+                                x:Name="PreviewGlyph"
+                                FontSize="52"
+                                Foreground="{StaticResource GlowBrush}"
+                                Glyph="&#xE721;" />
+                            <Image x:Name="PreviewImage" />
+                        </Grid>
+                        <TextBlock
+                            x:Name="PreviewTitle"
+                            HorizontalAlignment="Center"
+                            MaxLines="2"
+                            Style="{StaticResource SubtitleTextBlockStyle}"
+                            Text="İzekip Arama"
+                            TextAlignment="Center"
+                            TextTrimming="CharacterEllipsis"
+                            TextWrapping="Wrap" />
+                        <TextBlock
+                            x:Name="PreviewKind"
+                            HorizontalAlignment="Center"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="Yazmaya başla" />
+                    </StackPanel>
+                    <TextBlock
+                        x:Name="PreviewPath"
+                        Grid.Row="1"
+                        FontSize="12"
+                        Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                        IsTextSelectionEnabled="True"
+                        MaxLines="3"
+                        TextAlignment="Center"
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="Wrap" />
+                    <StackPanel
+                        x:Name="PreviewActions"
+                        Grid.Row="2"
+                        Spacing="2" />
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

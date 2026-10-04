@@ -1,0 +1,70 @@
+<Window
+    x:Class="IzekipShell.Views.DesktopWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:m="using:IzekipShell.Models">
+
+    <Grid x:Name="Root" Background="#FF101820">
+        <Image x:Name="Wallpaper" Stretch="UniformToFill" />
+
+        <GridView
+            x:Name="Icons"
+            Margin="6,6,6,54"
+            Background="Transparent"
+            ContainerContentChanging="Icons_ContainerContentChanging"
+            DoubleTapped="Icons_DoubleTapped"
+            KeyDown="Icons_KeyDown"
+            RightTapped="Icons_RightTapped"
+            ScrollViewer.HorizontalScrollBarVisibility="Auto"
+            ScrollViewer.HorizontalScrollMode="Enabled"
+            ScrollViewer.VerticalScrollBarVisibility="Disabled"
+            ScrollViewer.VerticalScrollMode="Disabled"
+            SelectionMode="Extended">
+            <GridView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <ItemsWrapGrid Orientation="Vertical" />
+                </ItemsPanelTemplate>
+            </GridView.ItemsPanel>
+            <GridView.ItemContainerStyle>
+                <Style BasedOn="{StaticResource DefaultGridViewItemStyle}" TargetType="GridViewItem">
+                    <Setter Property="Margin" Value="2" />
+                    <Setter Property="Padding" Value="0" />
+                </Style>
+            </GridView.ItemContainerStyle>
+            <GridView.ItemTemplate>
+                <DataTemplate x:DataType="m:DesktopItem">
+                    <StackPanel
+                        Width="84"
+                        Height="92"
+                        Padding="2,8,2,2"
+                        Spacing="4">
+                        <Image
+                            Width="40"
+                            Height="40"
+                            Source="{x:Bind Icon, Mode=OneWay}" />
+                        <!--  Duvar kagidinin ustunde okunabilsin diye golgeli yazi  -->
+                        <Grid>
+                            <TextBlock
+                                Margin="1,1,-1,-1"
+                                FontSize="12"
+                                Foreground="#B0000000"
+                                MaxLines="2"
+                                Text="{x:Bind Name}"
+                                TextAlignment="Center"
+                                TextTrimming="CharacterEllipsis"
+                                TextWrapping="Wrap" />
+                            <TextBlock
+                                FontSize="12"
+                                Foreground="White"
+                                MaxLines="2"
+                                Text="{x:Bind Name}"
+                                TextAlignment="Center"
+                                TextTrimming="CharacterEllipsis"
+                                TextWrapping="Wrap" />
+                        </Grid>
+                    </StackPanel>
+                </DataTemplate>
+            </GridView.ItemTemplate>
+        </GridView>
+    </Grid>
+</Window>
