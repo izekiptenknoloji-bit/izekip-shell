@@ -88,6 +88,7 @@ public sealed partial class StartWindow : Window
         BuildFolders();
         AppCatalog.Changed += Reload;
         ShellSettings.Changed += ReloadPins;
+        AppUpdater.Changed += () => DispatcherQueue.TryEnqueue(UpdateUpdateCard);
         Reload();
     }
 
@@ -113,7 +114,47 @@ public sealed partial class StartWindow : Window
         SystemStats.Cpu();
         UpdateStats();
         _statsTimer.Start();
+        UpdateUpdateCard();
         Root.Focus(FocusState.Programmatic);
+    }
+
+    // ---- Kabugun kendi guncellemesi (OTA) ----
+
+    void UpdateUpdateCard()
+    {
+        bool show = AppUpdater.State is AppUpdateState.Available or AppUpdateState.Downloading or AppUpdateState.ReadyToInstall;
+        UpdateCard.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+        if (!show) return;
+
+        UpdateProgress.Visibility = AppUpdater.State == AppUpdateState.Downloading ? Visibility.Visible : Visibility.Collapsed;
+        if (AppUpdater.State == AppUpdateState.Downloading) UpdateProgress.Value = AppUpdater.DownloadPercent;
+
+        switch (AppUpdater.State)
+        {
+            case AppUpdateState.Available:
+                UpdateTitle.Text = $"Yeni sürüm hazır: v{AppUpdater.LatestVersion}";
+                UpdateSubtitle.Text = string.IsNullOrWhiteSpace(AppUpdater.ReleaseNotes) ? "İzekip Shell için bir güncelleme var." : AppUpdater.ReleaseNotes;
+                UpdateAction.Content = "Şimdi güncelle";
+                UpdateAction.IsEnabled = true;
+                break;
+            case AppUpdateState.Downloading:
+                UpdateTitle.Text = "İndiriliyor…";
+                UpdateSubtitle.Text = $"%{AppUpdater.DownloadPercent} tamamlandı";
+                UpdateAction.IsEnabled = false;
+                break;
+            case AppUpdateState.ReadyToInstall:
+                UpdateTitle.Text = "Kurulmaya hazır";
+                UpdateSubtitle.Text = "Kabuk kapanıp yeni sürümle yeniden açılacak.";
+                UpdateAction.Content = "Yeniden başlat ve kur";
+                UpdateAction.IsEnabled = true;
+                break;
+        }
+    }
+
+    void UpdateAction_Click(object sender, RoutedEventArgs e)
+    {
+        if (AppUpdater.State == AppUpdateState.Available) AppUpdater.DownloadAndInstallAsync();
+        else if (AppUpdater.State == AppUpdateState.ReadyToInstall) AppUpdater.InstallAndRestart();
     }
 
     static string GreetingFor(int hour) => hour switch

@@ -134,6 +134,13 @@ public partial class App : Application
         timer.Interval = TimeSpan.FromHours(3);
         timer.Tick += (_, _) => WindowsUpdate.RefreshAsync();
         timer.Start();
+
+        // Kabugun kendi surumu: Windows Update'ten bagimsiz, GitHub Releases'ten.
+        AppUpdater.CheckAsync();
+        var appTimer = UI.CreateTimer();
+        appTimer.Interval = TimeSpan.FromHours(6);
+        appTimer.Tick += (_, _) => AppUpdater.CheckAsync();
+        appTimer.Start();
     }
 
     public bool IsDesktopWindow(IntPtr h) => Desktops.Any(d => d.Hwnd == h);

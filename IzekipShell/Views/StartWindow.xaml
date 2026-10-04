@@ -442,6 +442,51 @@
             Grid.Column="2"
             Padding="0,24,24,18"
             Spacing="12">
+
+            <!--  Kabugun kendi guncellemesi: sadece hazir oldugunda gorunur  -->
+            <Border
+                x:Name="UpdateCard"
+                Padding="16,14"
+                Background="{ThemeResource AccentFillColorDefaultBrush}"
+                CornerRadius="12"
+                Visibility="Collapsed">
+                <StackPanel Spacing="10">
+                    <Grid ColumnSpacing="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <FontIcon FontSize="18" Foreground="White" Glyph="&#xE895;" />
+                        <TextBlock
+                            x:Name="UpdateTitle"
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            FontWeight="SemiBold"
+                            Foreground="White"
+                            Text="Yeni sürüm hazır"
+                            TextTrimming="CharacterEllipsis" />
+                    </Grid>
+                    <TextBlock
+                        x:Name="UpdateSubtitle"
+                        FontSize="12"
+                        Foreground="White"
+                        Opacity="0.85"
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="Wrap" />
+                    <ProgressBar
+                        x:Name="UpdateProgress"
+                        Foreground="White"
+                        Visibility="Collapsed" />
+                    <Button
+                        x:Name="UpdateAction"
+                        Padding="12,6"
+                        Background="White"
+                        Click="UpdateAction_Click"
+                        Content="Şimdi güncelle"
+                        CornerRadius="6" />
+                </StackPanel>
+            </Border>
+
             <Border Style="{StaticResource WidgetCard}">
                 <StackPanel Spacing="12">
                     <TextBlock Style="{StaticResource SectionTitle}" Text="Sistem" />
