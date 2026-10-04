@@ -101,25 +101,20 @@ public sealed partial class PanelWindow : Window
             : (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorPrimaryBrush"];
     }
 
+    // Kart tek tiklama alani: kabugun kendi guncellemesinde yapilacak bir sey varsa
+    // (ayrintili kart Baslat menusunde) oraya, yoksa Windows Update sayfasina gider.
     void UpdateRow_Click(object sender, RoutedEventArgs e)
     {
         _popup.Hide();
-        AppCatalog.Open("ms-settings:windowsupdate");
+        bool appActionable = AppUpdater.State is AppUpdateState.Available or AppUpdateState.Downloading or AppUpdateState.ReadyToInstall;
+        if (appActionable) App.Current.StartMenu.Toggle();
+        else AppCatalog.Open("ms-settings:windowsupdate");
     }
 
     void UpdateRefresh_Click(object sender, RoutedEventArgs e)
     {
         WindowsUpdate.RefreshAsync();
         Update();
-    }
-
-    // Kabugun kendi guncellemesi: ayrintili kart (ilerleme, "simdi yeniden baslat", "ertele")
-    // Baslat menusunde oldugu icin oraya yonlendirir.
-    void AppUpdateRow_Click(object sender, RoutedEventArgs e)
-    {
-        _popup.Hide();
-        if (AppUpdater.State == AppUpdateState.Unknown) AppUpdater.CheckAsync();
-        App.Current.StartMenu.Toggle();
     }
 
     // ---- Wi-Fi ----

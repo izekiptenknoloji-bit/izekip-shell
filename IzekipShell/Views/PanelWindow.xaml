@@ -127,7 +127,7 @@
                             <TextBlock x:Name="BatteryText" Grid.Column="1" />
                         </Grid>
 
-                        <!--  Windows Update  -->
+                        <!--  Windows Update (altinda kabugun kendi OTA durumu ikinci satir olarak)  -->
                         <Button
                             Padding="0"
                             HorizontalAlignment="Stretch"
@@ -136,12 +136,17 @@
                             BorderThickness="0"
                             Click="UpdateRow_Click"
                             Style="{StaticResource TaskButtonStyle}">
-                            <Grid ColumnSpacing="14">
+                            <Grid ColumnSpacing="14" RowSpacing="6">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
                                 <FontIcon x:Name="UpdateIcon" FontSize="16" Glyph="&#xE895;" />
                                 <TextBlock
                                     x:Name="UpdateText"
@@ -159,31 +164,30 @@
                                     ToolTipService.ToolTip="Şimdi denetle">
                                     <FontIcon FontSize="12" Glyph="&#xE72C;" />
                                 </Button>
-                            </Grid>
-                        </Button>
 
-                        <!--  Izekip Shell'in kendi guncellemesi (OTA)  -->
-                        <Button
-                            x:Name="AppUpdateRow"
-                            Padding="0"
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Stretch"
-                            Background="Transparent"
-                            BorderThickness="0"
-                            Click="AppUpdateRow_Click"
-                            Style="{StaticResource TaskButtonStyle}">
-                            <Grid ColumnSpacing="14">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <FontIcon x:Name="AppUpdateIcon" FontSize="16" Glyph="&#xE71D;" />
-                                <TextBlock
-                                    x:Name="AppUpdateText"
-                                    Grid.Column="1"
-                                    VerticalAlignment="Center"
-                                    Text="İzekip Shell Güncellemesi"
-                                    TextTrimming="CharacterEllipsis" />
+                                <!--  Izekip Shell'in kendi guncellemesi: Windows Update'in hemen altinda, ayni kart icinde  -->
+                                <Rectangle
+                                    Grid.Row="1"
+                                    Grid.ColumnSpan="3"
+                                    Height="1"
+                                    Margin="0,0,0,2"
+                                    Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                                <StackPanel
+                                    Grid.Row="2"
+                                    Grid.Column="0"
+                                    Grid.ColumnSpan="3"
+                                    Margin="0,2,0,0"
+                                    Orientation="Horizontal"
+                                    Spacing="14">
+                                    <FontIcon x:Name="AppUpdateIcon" FontSize="16" Glyph="&#xE71D;" />
+                                    <TextBlock
+                                        x:Name="AppUpdateText"
+                                        VerticalAlignment="Center"
+                                        FontSize="12"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="İzekip Shell Güncellemesi"
+                                        TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
                             </Grid>
                         </Button>
                     </StackPanel>
