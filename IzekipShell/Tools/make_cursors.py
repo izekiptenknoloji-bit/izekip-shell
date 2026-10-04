@@ -90,6 +90,20 @@ def gradient():
 
 GRADIENT = gradient()
 
+# Sekiller 32 birimlik tuvali neredeyse dolduruyordu; varsayilan Windows imlecine
+# gore cok iri duruyordu. Her imleci kendi tiklama noktasinin (hotspot) etrafinda
+# kuculterek hem boyutu azaltiyoruz hem de tiklanan piksel yerinde kaliyor.
+SHRINK = 0.68
+
+
+def shrink(img, hot, factor=SHRINK):
+    hx, hy = hot[0] * U, hot[1] * U
+    small = img.resize((int(CANVAS * factor), int(CANVAS * factor)), Image.LANCZOS)
+    off = (int(hx - hx * factor), int(hy - hy * factor))
+    canvas = Image.new("RGBA", (CANVAS, CANVAS), (0, 0, 0, 0))
+    canvas.paste(small, off, small)
+    return canvas
+
 
 def render(shape, outline=1.5, extra=None):
     """shape: dolgu maskesi. extra: (maske, renk) ciftleri, dolgunun ustune."""
@@ -239,7 +253,7 @@ def main():
     preview = []
 
     def static(name, mask, hot, outline=1.5, extra=None):
-        img = render(mask, outline, extra)
+        img = shrink(render(mask, outline, extra), hot)
         save(name, cur_bytes(img, hot, SIZES))
         preview.append(img)
 
@@ -257,7 +271,7 @@ def main():
     static("up.cur", up_mask(), (16, 2))
 
     badge, q = help_extra()
-    help_img = render(union(arrow_mask(), badge), 1.5, [(q, (255, 255, 255, 255))])
+    help_img = shrink(render(union(arrow_mask(), badge), 1.5, [(q, (255, 255, 255, 255))]), (3, 2))
     save("help.cur", cur_bytes(help_img, (3, 2), SIZES))
     preview.append(help_img)
 
@@ -266,7 +280,7 @@ def main():
     for i in range(frames):
         track, arc = spinner(16, 16, 10.5, 3.6, i / frames)
         disc = ellipse(4.2, 4.2, 27.8, 27.8)
-        img = render(minus(disc, ellipse(9.6, 9.6, 22.4, 22.4)), 1.3, [(arc, (255, 255, 255, 255))])
+        img = shrink(render(minus(disc, ellipse(9.6, 9.6, 22.4, 22.4)), 1.3, [(arc, (255, 255, 255, 255))]), (16, 16))
         busy.append(img)
     save("busy.ani", ani_bytes(busy, (16, 16), 3))
     preview.append(busy[0])
@@ -275,7 +289,7 @@ def main():
     for i in range(frames):
         track, arc = spinner(23.5, 23.5, 5.2, 2.4, i / frames)
         ring = minus(ellipse(16.6, 16.6, 30.4, 30.4), ellipse(20.6, 20.6, 26.4, 26.4))
-        img = render(union(arrow_mask(), ring), 1.5, [(arc, (255, 255, 255, 255))])
+        img = shrink(render(union(arrow_mask(), ring), 1.5, [(arc, (255, 255, 255, 255))]), (3, 2))
         working.append(img)
     save("working.ani", ani_bytes(working, (3, 2), 3))
     preview.append(working[0])

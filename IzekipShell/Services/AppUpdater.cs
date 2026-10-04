@@ -13,7 +13,7 @@ public enum AppUpdateState { Unknown, Checking, UpToDate, Available, Downloading
 // Hicbir surum yayinlanmamissa ya da internet yoksa sessizce "UpToDate" sayilir.
 public static class AppUpdater
 {
-    public const string CurrentVersion = "1.2.0";
+    public const string CurrentVersion = "1.2.1";
     const string Owner = "izekiptenknoloji-bit", Repo = "izekip-shell";
 
     public static AppUpdateState State { get; private set; } = AppUpdateState.Unknown;

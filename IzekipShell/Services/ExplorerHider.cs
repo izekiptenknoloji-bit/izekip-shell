@@ -82,6 +82,10 @@ public static class ExplorerHider
             if (_state is null) return;
             Apply(_state);
             _state = null;
+            // Explorer kabuk acikken yeniden baslamis olabilir: o zaman eski tutamaclar
+            // gecersiz kalir ve yeni dogan Progman/WorkerW/Shell_TrayWnd gizli takilabilir.
+            // Canli bir tarama da yapip bulunani gostermek, masaustunun bos gorunmesini onler.
+            ShowLiveTargets();
             try { File.Delete(StateFile); } catch { }
         }
     }
@@ -98,11 +102,17 @@ public static class ExplorerHider
                 if (state is not null) Apply(state);
             }
             catch { }
-            // Pencere tutamaclari degismis olabilir: explorer'in butun kabuk pencerelerini ac.
-            foreach (var h in Targets())
-                if (Native.ClassName(h) != "WorkerW") Native.ShowWindow(h, Native.SW_SHOWNA);
+            ShowLiveTargets();
             try { File.Delete(StateFile); } catch { }
         }
+    }
+
+    // Pencere tutamaclari degismis olabilir (explorer yeniden baslamis gibi): o anda
+    // bulunan butun kabuk pencerelerini gosterir. WorkerW haric; o zaten gorunmez katmandir.
+    static void ShowLiveTargets()
+    {
+        foreach (var h in Targets())
+            if (Native.ClassName(h) != "WorkerW") Native.ShowWindow(h, Native.SW_SHOWNA);
     }
 
     static void Apply(State state)
