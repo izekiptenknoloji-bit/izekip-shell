@@ -16,11 +16,14 @@
     <WindowsPackageType>None</WindowsPackageType>
     <!-- Windows App Runtime exe'nin yanina gelir, ayrica kurulum istemez -->
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
-    <!-- Release derlemesi .NET calisma zamanini da icine gomer: hedef PC'de .NET kurulu olmasa da calisir. -->
+    <!-- Release derlemesi .NET calisma zamanini da icine gomer: hedef PC'de .NET kurulu olmasa da calisir.
+         ONEMLI: dagitim paketini "dotnet build -c Release", "dotnet publish" DEGIL ile uretilen
+         bin\...\win-x64 klasorunden al. publish/ alt klasoru WinUI'nin derlenmis kaynaklarini
+         (IzekipShell.pri, *.xbf) kopyalamiyor; o klasorden paketlenen exe acilista sessizce coker. -->
     <SelfContained Condition="'$(Configuration)'=='Release'">true</SelfContained>
     <AssemblyName>IzekipShell</AssemblyName>
     <ApplicationTitle>İzekip Shell</ApplicationTitle>
-    <Version>1.2.1</Version>
+    <Version>1.2.2</Version>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
   </PropertyGroup>
 
