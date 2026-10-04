@@ -13,7 +13,7 @@ public enum AppUpdateState { Unknown, Checking, UpToDate, Available, Downloading
 // Hicbir surum yayinlanmamissa ya da internet yoksa sessizce "UpToDate" sayilir.
 public static class AppUpdater
 {
-    public const string CurrentVersion = "1.1.0";
+    public const string CurrentVersion = "1.2.0";
     const string Owner = "izekiptenknoloji-bit", Repo = "izekip-shell";
 
     public static AppUpdateState State { get; private set; } = AppUpdateState.Unknown;
@@ -22,22 +22,29 @@ public static class AppUpdater
     public static string? ReleaseUrl { get; private set; }
     public static int DownloadPercent { get; private set; }
     public static string? Error { get; private set; }
+    public static DateTime? AutoInstallAt { get; private set; }
     public static event Action? Changed;
 
     static string? _assetUrl;
     static bool _busy;
+    static Timer? _installTimer;
+
+    // Kurulumdan once kullanici fark etsin ve isterse ertelesin diye kisa bir bekleme.
+    static readonly TimeSpan AutoInstallDelay = TimeSpan.FromSeconds(20);
 
     public static string Summary => State switch
     {
         AppUpdateState.Checking => "Güncelleme denetleniyor…",
-        AppUpdateState.Available => $"Yeni sürüm hazır: v{LatestVersion}",
+        AppUpdateState.Available => $"Yeni sürüm bulundu: v{LatestVersion}",
         AppUpdateState.Downloading => $"İndiriliyor… %{DownloadPercent}",
-        AppUpdateState.ReadyToInstall => "Yeniden başlatmaya hazır",
+        AppUpdateState.ReadyToInstall => "Otomatik kuruluma hazırlanıyor",
         AppUpdateState.Installing => "Kuruluyor…",
         AppUpdateState.Error => "Denetlenemedi",
         AppUpdateState.UpToDate => "En güncel sürümdesin",
         _ => "",
     };
+
+    public static TimeSpan? AutoInstallIn => AutoInstallAt is { } at && at > DateTime.Now ? at - DateTime.Now : null;
 
     public static async void CheckAsync()
     {
@@ -80,6 +87,9 @@ public static class AppUpdater
         {
             _busy = false;
             Changed?.Invoke();
+            // Bulununca elle onay beklemeden indirip hazirlanir; kurulum yine de kisa bir
+            // geri sayimla yapilir ki kullanici isterse ertelesin.
+            if (State == AppUpdateState.Available) DownloadAndInstallAsync();
         }
     }
 
@@ -130,6 +140,7 @@ public static class AppUpdater
 
             _stagedRoot = root;
             State = AppUpdateState.ReadyToInstall;
+            ScheduleAutoInstall(AutoInstallDelay);
         }
         catch (Exception e)
         {
@@ -145,11 +156,29 @@ public static class AppUpdater
 
     static string? _stagedRoot;
 
+    static void ScheduleAutoInstall(TimeSpan delay)
+    {
+        AutoInstallAt = DateTime.Now + delay;
+        _installTimer?.Dispose();
+        _installTimer = new Timer(_ => App.Current.UI.TryEnqueue(InstallAndRestart), null, delay, Timeout.InfiniteTimeSpan);
+    }
+
+    // Kurulumu bir saat erteler (ustteki kartta "Ertele" dugmesi).
+    public static void Postpone()
+    {
+        if (State != AppUpdateState.ReadyToInstall) return;
+        ScheduleAutoInstall(TimeSpan.FromHours(1));
+        Changed?.Invoke();
+    }
+
     // Guncel dosyalari calisan klasorun uzerine kopyalayan bir betik yazar, kabugu kapatir,
     // betigi baslatir (kabuk tamamen cikinca dosyalar serbest kalir) ve exe'yi yeniden acar.
     public static void InstallAndRestart()
     {
         if (_stagedRoot is null) return;
+        _installTimer?.Dispose();
+        _installTimer = null;
+        AutoInstallAt = null;
         State = AppUpdateState.Installing;
         Changed?.Invoke();
 

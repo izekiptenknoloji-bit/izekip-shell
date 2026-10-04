@@ -477,13 +477,28 @@
                         x:Name="UpdateProgress"
                         Foreground="White"
                         Visibility="Collapsed" />
-                    <Button
-                        x:Name="UpdateAction"
-                        Padding="12,6"
-                        Background="White"
-                        Click="UpdateAction_Click"
-                        Content="Şimdi güncelle"
-                        CornerRadius="6" />
+                    <StackPanel
+                        x:Name="UpdateActions"
+                        Orientation="Horizontal"
+                        Spacing="8">
+                        <Button
+                            x:Name="UpdateAction"
+                            Padding="12,6"
+                            Background="White"
+                            Click="UpdateAction_Click"
+                            Content="Şimdi yeniden başlat"
+                            CornerRadius="6" />
+                        <Button
+                            x:Name="UpdatePostpone"
+                            Padding="12,6"
+                            Background="Transparent"
+                            BorderBrush="White"
+                            BorderThickness="1"
+                            Click="UpdatePostpone_Click"
+                            Content="1 saat ertele"
+                            CornerRadius="6"
+                            Foreground="White" />
+                    </StackPanel>
                 </StackPanel>
             </Border>
 

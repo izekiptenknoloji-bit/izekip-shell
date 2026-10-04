@@ -73,8 +73,9 @@ public sealed partial class StartWindow : Window
         _statsTimer.Interval = TimeSpan.FromSeconds(1);
         _statsTimer.Tick += (_, _) =>
         {
-            if (_popup.IsOpen) UpdateStats();
-            else _statsTimer.Stop();
+            if (!_popup.IsOpen) { _statsTimer.Stop(); return; }
+            UpdateStats();
+            if (AppUpdater.State == AppUpdateState.ReadyToInstall) UpdateUpdateCard();
         };
 
         // Not yazma durunca kaydedilir.
@@ -122,40 +123,41 @@ public sealed partial class StartWindow : Window
 
     void UpdateUpdateCard()
     {
-        bool show = AppUpdater.State is AppUpdateState.Available or AppUpdateState.Downloading or AppUpdateState.ReadyToInstall;
+        bool show = AppUpdater.State is AppUpdateState.Available or AppUpdateState.Downloading or AppUpdateState.ReadyToInstall or AppUpdateState.Installing;
         UpdateCard.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
         if (!show) return;
 
         UpdateProgress.Visibility = AppUpdater.State == AppUpdateState.Downloading ? Visibility.Visible : Visibility.Collapsed;
         if (AppUpdater.State == AppUpdateState.Downloading) UpdateProgress.Value = AppUpdater.DownloadPercent;
+        // Guncelleme otomatik indirilip kuruldugu icin elle baslatma dugmesi yalniz
+        // kurulumu beklerken (erken baslat / ertele) gorunur.
+        UpdateActions.Visibility = AppUpdater.State == AppUpdateState.ReadyToInstall ? Visibility.Visible : Visibility.Collapsed;
 
         switch (AppUpdater.State)
         {
             case AppUpdateState.Available:
-                UpdateTitle.Text = $"Yeni sürüm hazır: v{AppUpdater.LatestVersion}";
-                UpdateSubtitle.Text = string.IsNullOrWhiteSpace(AppUpdater.ReleaseNotes) ? "İzekip Shell için bir güncelleme var." : AppUpdater.ReleaseNotes;
-                UpdateAction.Content = "Şimdi güncelle";
-                UpdateAction.IsEnabled = true;
+                UpdateTitle.Text = $"Yeni sürüm bulundu: v{AppUpdater.LatestVersion}";
+                UpdateSubtitle.Text = "İndirmeye başlanıyor…";
                 break;
             case AppUpdateState.Downloading:
-                UpdateTitle.Text = "İndiriliyor…";
+                UpdateTitle.Text = $"v{AppUpdater.LatestVersion} indiriliyor…";
                 UpdateSubtitle.Text = $"%{AppUpdater.DownloadPercent} tamamlandı";
-                UpdateAction.IsEnabled = false;
                 break;
             case AppUpdateState.ReadyToInstall:
-                UpdateTitle.Text = "Kurulmaya hazır";
+                UpdateTitle.Text = $"v{AppUpdater.LatestVersion} kuruluma hazır";
+                UpdateSubtitle.Text = AppUpdater.AutoInstallIn is { } left
+                    ? $"{Math.Max(0, (int)left.TotalSeconds)} saniye içinde otomatik kurulup yeniden başlayacak"
+                    : "Birazdan otomatik kurulup yeniden başlayacak";
+                break;
+            case AppUpdateState.Installing:
+                UpdateTitle.Text = "Kuruluyor…";
                 UpdateSubtitle.Text = "Kabuk kapanıp yeni sürümle yeniden açılacak.";
-                UpdateAction.Content = "Yeniden başlat ve kur";
-                UpdateAction.IsEnabled = true;
                 break;
         }
     }
 
-    void UpdateAction_Click(object sender, RoutedEventArgs e)
-    {
-        if (AppUpdater.State == AppUpdateState.Available) AppUpdater.DownloadAndInstallAsync();
-        else if (AppUpdater.State == AppUpdateState.ReadyToInstall) AppUpdater.InstallAndRestart();
-    }
+    void UpdateAction_Click(object sender, RoutedEventArgs e) => AppUpdater.InstallAndRestart();
+    void UpdatePostpone_Click(object sender, RoutedEventArgs e) => AppUpdater.Postpone();
 
     static string GreetingFor(int hour) => hour switch
     {
