@@ -10,6 +10,20 @@ uygular — Windows 11'in birebir kopyası değil, kendi tasarım dili ve özell
 > her şey geri gelir. Gerçek oturum kabuğu (`Winlogon\Shell`) olarak kurulum henüz
 > desteklenmiyor.
 
+## İndir
+
+En kolay yol: [son sürümdeki](../../releases/latest) **`IzekipShell-Setup.exe`**
+dosyasını indir, çalıştır. Kendini `%LocalAppData%\Programs\IzekipShell`'e kurar,
+Başlat menüsüne kısayol bırakır ve kabuğu açar. Kaynak kodla uğraşmak istemeyenler
+için tek dosyalık, kurulumsuz bir SFX paketidir (Windows'un kendi `iexpress`
+aracıyla üretilir, bkz. `Tools/make_installer.py`).
+
+Elle çalıştırmak isteyenler aynı sürümdeki `IzekipShell-win-x64.zip`'i açıp
+`IzekipShell.exe`'yi doğrudan başlatabilir.
+
+Kabuk açıldıktan sonra kendi güncellemelerini de otomatik indirip kurar (OTA);
+elle güncellemen gerekmez.
+
 ## Özellikler
 
 - **Görev çubuğu** — Başlat düğmesi, arama kutusu, açık pencere listesi (gruplama,
