@@ -16,6 +16,8 @@
     <WindowsPackageType>None</WindowsPackageType>
     <!-- Windows App Runtime exe'nin yanina gelir, ayrica kurulum istemez -->
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <!-- Release derlemesi .NET calisma zamanini da icine gomer: hedef PC'de .NET kurulu olmasa da calisir. -->
+    <SelfContained Condition="'$(Configuration)'=='Release'">true</SelfContained>
     <AssemblyName>IzekipShell</AssemblyName>
     <ApplicationTitle>İzekip Shell</ApplicationTitle>
     <Version>1.2.0</Version>
