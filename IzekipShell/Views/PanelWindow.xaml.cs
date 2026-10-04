@@ -27,6 +27,7 @@ public sealed partial class PanelWindow : Window
             _timer.Start();
         };
         WindowsUpdate.Changed += () => DispatcherQueue.TryEnqueue(Update);
+        AppUpdater.Changed += () => DispatcherQueue.TryEnqueue(Update);
 
         _timer = DispatcherQueue.CreateTimer();
         _timer.Interval = TimeSpan.FromSeconds(1);
@@ -37,7 +38,7 @@ public sealed partial class PanelWindow : Window
         };
     }
 
-    public void Toggle() => _popup.Toggle(() => App.Current.Taskbar.PopupRect(380, 480, right: true));
+    public void Toggle() => _popup.Toggle(() => App.Current.Taskbar.PopupRect(380, 530, right: true));
 
     public void ForegroundChanged(IntPtr h) => _popup.ForegroundChanged(h);
 
@@ -86,6 +87,18 @@ public sealed partial class PanelWindow : Window
             ? (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["SystemFillColorCautionBrush"]
             : (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorPrimaryBrush"];
         UpdateRefresh.IsEnabled = WindowsUpdate.State != UpdateState.Checking;
+
+        AppUpdateText.Text = "İzekip Shell — " + AppUpdater.Summary;
+        AppUpdateIcon.Glyph = AppUpdater.State switch
+        {
+            AppUpdateState.ReadyToInstall => "",
+            AppUpdateState.UpToDate => "",
+            AppUpdateState.Error => "",
+            _ => "",
+        };
+        AppUpdateIcon.Foreground = AppUpdater.State is AppUpdateState.Available or AppUpdateState.Downloading or AppUpdateState.ReadyToInstall
+            ? (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["SystemFillColorCautionBrush"]
+            : (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorPrimaryBrush"];
     }
 
     void UpdateRow_Click(object sender, RoutedEventArgs e)
@@ -98,6 +111,15 @@ public sealed partial class PanelWindow : Window
     {
         WindowsUpdate.RefreshAsync();
         Update();
+    }
+
+    // Kabugun kendi guncellemesi: ayrintili kart (ilerleme, "simdi yeniden baslat", "ertele")
+    // Baslat menusunde oldugu icin oraya yonlendirir.
+    void AppUpdateRow_Click(object sender, RoutedEventArgs e)
+    {
+        _popup.Hide();
+        if (AppUpdater.State == AppUpdateState.Unknown) AppUpdater.CheckAsync();
+        App.Current.StartMenu.Toggle();
     }
 
     // ---- Wi-Fi ----

@@ -161,6 +161,31 @@
                                 </Button>
                             </Grid>
                         </Button>
+
+                        <!--  Izekip Shell'in kendi guncellemesi (OTA)  -->
+                        <Button
+                            x:Name="AppUpdateRow"
+                            Padding="0"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Click="AppUpdateRow_Click"
+                            Style="{StaticResource TaskButtonStyle}">
+                            <Grid ColumnSpacing="14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <FontIcon x:Name="AppUpdateIcon" FontSize="16" Glyph="&#xE71D;" />
+                                <TextBlock
+                                    x:Name="AppUpdateText"
+                                    Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    Text="İzekip Shell Güncellemesi"
+                                    TextTrimming="CharacterEllipsis" />
+                            </Grid>
+                        </Button>
                     </StackPanel>
                 </Border>
 
