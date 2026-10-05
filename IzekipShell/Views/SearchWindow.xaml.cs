@@ -34,7 +34,7 @@ public sealed partial class SearchWindow : Window
     {
         InitializeComponent();
         SystemTheme.Bind(Root);
-        Title = "İzekip Arama";
+        Title = "Explorer33 Arama";
         _popup = new PopupController(this, Root);
         _popup.Opened += OnOpened;
         _source = (CollectionViewSource)Root.Resources["ResultsSource"];
@@ -285,7 +285,7 @@ public sealed partial class SearchWindow : Window
         if (entry is null)
         {
             PreviewGlyph.Glyph = "";
-            PreviewTitle.Text = "İzekip Arama";
+            PreviewTitle.Text = "Explorer33 Arama";
             PreviewKind.Text = QueryBox.Text.Trim().Length == 0 ? "Yazmaya başla" : "Sonuç yok";
             PreviewPath.Text = "";
             return;

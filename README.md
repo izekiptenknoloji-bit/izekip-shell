@@ -1,14 +1,18 @@
-# İzekip Shell
+# Explorer33
 
 Windows 11'in `explorer.exe` kabuğunun yerini alabilen, WinUI 3 ve C# ile yazılmış,
 Fluent tasarımlı deneysel bir masaüstü kabuğu. Görev çubuğu, Başlat menüsü, arama,
 denetim merkezi, saat/takvim paneli ve masaüstü simgelerinin tamamını sıfırdan
 uygular — Windows 11'in birebir kopyası değil, kendi tasarım dili ve özellikleriyle.
 
-> ⚠️ **Deneysel proje.** Şu an yalnızca *test modunda* çalışır: Windows'un kendi
-> görev çubuğu ve masaüstü gizlenir, `İzekip Shell` onların yerine geçer; kapatınca
-> her şey geri gelir. Gerçek oturum kabuğu (`Winlogon\Shell`) olarak kurulum henüz
-> desteklenmiyor.
+> ⚠️ **Deneysel proje.** Varsayılan olarak *test modunda* çalışır: Windows'un kendi
+> görev çubuğu ve masaüstü gizlenir, `Explorer33` onların yerine geçer; kapatınca
+> her şey geri gelir. İsteyenler `--kur-kabuk` ile gerçek oturum kabuğu
+> (`Winlogon\Shell`, yalnızca bu kullanıcı için, yönetici hakkı gerekmez) olarak da
+> kurabilir — art arda başarısız açılışlarda otomatik olarak `explorer.exe`'ye geri
+> dönen bir güvenlik ağı var, ama yine de riski bilerek kullanın. Elle kurtarma:
+> Ctrl+Shift+Esc → Görev Yöneticisi → Dosya → Yeni görev çalıştır → `explorer.exe`.
+> Kaldırmak için: `--kabuk-kaldir`, ya da Başlat → Güç menüsünden.
 
 ## İndir
 

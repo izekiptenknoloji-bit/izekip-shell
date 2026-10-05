@@ -62,6 +62,20 @@ public partial class App : Application
             RunUpdateHelper(rawArgv[1], rawArgv[2]);
             return;
         }
+        if (argv.Contains("--kur-kabuk")) { ShellInstaller.Install(); Exit(); return; }
+        if (argv.Contains("--kabuk-kaldir")) { ShellInstaller.Uninstall(); Exit(); return; }
+
+        // Gercek oturum kabugu olarak kuruluysa: art arda basarisiz acilista guvenlik agi
+        // devreye girer, explorer.exe'ye geri doner. Boylece bozuk bir surum kullaniciyi
+        // masaustusuz birakmaz.
+        IsRealShell = ShellInstaller.IsInstalled;
+        if (IsRealShell && !BootGuard.BeginAttempt())
+        {
+            ShellInstaller.Uninstall();
+            try { Process.Start("explorer.exe"); } catch (Exception e) { AppPaths.Log(e); }
+            Exit();
+            return;
+        }
 
         _single = new Mutex(true, "IzekipShell.TekKopya", out bool first);
         if (!first) { Exit(); return; }
@@ -73,6 +87,9 @@ public partial class App : Application
             Quit();
         }
     }
+
+    public bool IsRealShell { get; private set; }
+    DispatcherQueueTimer? _stableTimer; // alan olarak tutulur: yerel degisken GC tarafindan erken toplanip Tick hic ateslenmeyebilir.
 
     // OTA guncellemesi: eski surum tamamen kapanana kadar tek basina "Guncelleniyor" ekranini
     // gosterir, sonra dosyalari kopyalayip yeni surumu acar. Tam kabuk burada hic calismaz.
@@ -112,6 +129,10 @@ public partial class App : Application
     void Boot()
     {
         UI = DispatcherQueue.GetForCurrentThread();
+        // Gercek kabuk modunda Windows explorer.exe'yi kendiliginden baslatmaz (biz onun
+        // yerine gecmisizdir); masaustu simgeleri/bildirim altyapisi icin kendimiz baslatiriz,
+        // sonra her zamanki gibi gorev cubugunu/penceresini gizleriz.
+        if (IsRealShell) SpawnExplorerForDesktop();
         ExplorerHider.RestoreStale();
         IconCache.Instance = new IconCache(UI);
         ExplorerHider.Hide(UI);
@@ -146,6 +167,30 @@ public partial class App : Application
         _ = AppCatalog.LoadAsync();
         ListenForQuit();
         StartUpdateChecks();
+
+        // Gercek kabuk modunda: sorunsuz 15 saniye gecince "kararli acilis" olarak isaretlenir,
+        // guvenlik agindaki basarisizlik sayaci sifirlanir.
+        if (IsRealShell)
+        {
+            _stableTimer = UI.CreateTimer();
+            _stableTimer.Interval = TimeSpan.FromSeconds(15);
+            _stableTimer.IsRepeating = false;
+            _stableTimer.Tick += (_, _) => BootGuard.MarkStable();
+            _stableTimer.Start();
+        }
+    }
+
+    // Gercek kabuk modunda masaustu/bildirim altyapisi icin explorer.exe'yi kendimiz baslatir,
+    // gorev cubugu penceresi belirene kadar (en fazla ~5sn) kisaca bekleriz.
+    static void SpawnExplorerForDesktop()
+    {
+        try
+        {
+            Process.Start("explorer.exe");
+            for (int i = 0; i < 50 && Interop.Native.FindWindow("Shell_TrayWnd", null) == 0; i++)
+                Thread.Sleep(100);
+        }
+        catch (Exception e) { AppPaths.Log(e); }
     }
 
     // FindAll'in donen listesi foreach ile gezilince bazi surumlerde patliyor; dizinle gezilir.

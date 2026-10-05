@@ -185,7 +185,7 @@
                                         VerticalAlignment="Center"
                                         FontSize="12"
                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                        Text="İzekip Shell Güncellemesi"
+                                        Text="Explorer33 Güncellemesi"
                                         TextTrimming="CharacterEllipsis" />
                                 </StackPanel>
                             </Grid>

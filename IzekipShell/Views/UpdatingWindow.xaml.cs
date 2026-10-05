@@ -12,7 +12,7 @@ public sealed partial class UpdatingWindow : Window
     public UpdatingWindow()
     {
         InitializeComponent();
-        Title = "İzekip Shell Güncelleniyor";
+        Title = "Explorer33 Güncelleniyor";
         SystemTheme.Bind(Root);
 
         var hwnd = WindowHelper.Handle(this);

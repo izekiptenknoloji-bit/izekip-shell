@@ -47,7 +47,7 @@ public sealed partial class TaskbarWindow : Window
         Monitor = monitor;
         InitializeComponent();
         SystemTheme.Bind(Root);
-        Title = "İzekip Görev Çubuğu";
+        Title = "Explorer33 Görev Çubuğu";
         _hwnd = WindowHelper.Handle(this);
         _presenter = WindowHelper.MakeChrome(this, topmost: true);
         int square = 1; // DWMWCP_DONOTROUND

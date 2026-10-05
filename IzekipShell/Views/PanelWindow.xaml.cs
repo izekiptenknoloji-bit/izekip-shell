@@ -19,7 +19,7 @@ public sealed partial class PanelWindow : Window
     {
         InitializeComponent();
         SystemTheme.Bind(Root);
-        Title = "İzekip Denetim Merkezi";
+        Title = "Explorer33 Denetim Merkezi";
         _popup = new PopupController(this, Root);
         _popup.Opened += () =>
         {
@@ -89,7 +89,7 @@ public sealed partial class PanelWindow : Window
             : (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorPrimaryBrush"];
         UpdateRefresh.IsEnabled = WindowsUpdate.State != UpdateState.Checking;
 
-        AppUpdateText.Text = "İzekip Shell — " + AppUpdater.Summary;
+        AppUpdateText.Text = "Explorer33 — " + AppUpdater.Summary;
         AppUpdateIcon.Glyph = AppUpdater.State switch
         {
             AppUpdateState.ReadyToInstall => "",

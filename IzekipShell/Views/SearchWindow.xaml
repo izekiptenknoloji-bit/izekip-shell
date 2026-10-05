@@ -256,7 +256,7 @@
                             HorizontalAlignment="Center"
                             MaxLines="2"
                             Style="{StaticResource SubtitleTextBlockStyle}"
-                            Text="İzekip Arama"
+                            Text="Explorer33 Arama"
                             TextAlignment="Center"
                             TextTrimming="CharacterEllipsis"
                             TextWrapping="Wrap" />

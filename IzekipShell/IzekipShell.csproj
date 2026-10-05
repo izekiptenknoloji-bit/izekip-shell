@@ -22,8 +22,8 @@
          (IzekipShell.pri, *.xbf) kopyalamiyor; o klasorden paketlenen exe acilista sessizce coker. -->
     <SelfContained Condition="'$(Configuration)'=='Release'">true</SelfContained>
     <AssemblyName>IzekipShell</AssemblyName>
-    <ApplicationTitle>İzekip Shell</ApplicationTitle>
-    <Version>1.2.6</Version>
+    <ApplicationTitle>Explorer33</ApplicationTitle>
+    <Version>1.3.0</Version>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
   </PropertyGroup>
 

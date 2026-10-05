@@ -35,7 +35,7 @@ public sealed partial class DesktopWindow : Window
     {
         InitializeComponent();
         SystemTheme.Bind(Root);
-        Title = "İzekip Masaüstü";
+        Title = "Explorer33 Masaüstü";
         _bounds = bounds;
         _primary = primary;
         Hwnd = WindowHelper.Handle(this);

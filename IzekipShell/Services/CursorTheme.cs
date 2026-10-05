@@ -46,7 +46,7 @@ public static class CursorTheme
                 var path = Path.Combine(dir, file);
                 if (File.Exists(path)) key.SetValue(name, path, RegistryValueKind.String);
             }
-            key.SetValue("", "İzekip", RegistryValueKind.String);
+            key.SetValue("", "Explorer33", RegistryValueKind.String);
             Reload();
         }
     }

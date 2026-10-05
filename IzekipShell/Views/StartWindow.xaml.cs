@@ -58,7 +58,7 @@ public sealed partial class StartWindow : Window
     {
         InitializeComponent();
         SystemTheme.Bind(Root);
-        Title = "İzekip Başlat";
+        Title = "Explorer33 Başlat";
         _popup = new PopupController(this, Root);
         _popup.Opened += OnOpened;
 
@@ -69,6 +69,7 @@ public sealed partial class StartWindow : Window
 
         var user = Environment.UserName;
         UserPicture.DisplayName = user;
+        UninstallRealShellItem.Visibility = App.Current.IsRealShell ? Visibility.Visible : Visibility.Collapsed;
 
         _statsTimer = DispatcherQueue.CreateTimer();
         _statsTimer.Interval = TimeSpan.FromSeconds(1);
@@ -476,6 +477,12 @@ public sealed partial class StartWindow : Window
     void Restart_Click(object sender, RoutedEventArgs e) => PowerOff("/r");
     void Shutdown_Click(object sender, RoutedEventArgs e) => PowerOff("/s");
     void Quit_Click(object sender, RoutedEventArgs e) => App.Current.Quit();
+
+    void UninstallRealShell_Click(object sender, RoutedEventArgs e)
+    {
+        Services.ShellInstaller.Uninstall();
+        App.Current.Quit();
+    }
 
     // Kapanistan once Windows arayuzu geri yuklenir; bir sonraki acilis temiz olsun.
     static void PowerOff(string flag)

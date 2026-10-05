@@ -206,6 +206,15 @@
                                     <FontIcon Glyph="&#xE89F;" />
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
+                            <MenuFlyoutItem
+                                x:Name="UninstallRealShellItem"
+                                Click="UninstallRealShell_Click"
+                                Text="Gerçek kabuktan kaldır (Explorer'a dön)"
+                                Visibility="Collapsed">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE7A7;" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
                         </MenuFlyout>
                     </Button.Flyout>
                 </Button>
