@@ -23,7 +23,7 @@
     <SelfContained Condition="'$(Configuration)'=='Release'">true</SelfContained>
     <AssemblyName>IzekipShell</AssemblyName>
     <ApplicationTitle>İzekip Shell</ApplicationTitle>
-    <Version>1.2.5</Version>
+    <Version>1.2.6</Version>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
   </PropertyGroup>
 

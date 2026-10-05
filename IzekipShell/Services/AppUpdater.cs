@@ -13,7 +13,7 @@ public enum AppUpdateState { Unknown, Checking, UpToDate, Available, Downloading
 // Hicbir surum yayinlanmamissa ya da internet yoksa sessizce "UpToDate" sayilir.
 public static class AppUpdater
 {
-    public const string CurrentVersion = "1.2.5";
+    public const string CurrentVersion = "1.2.6";
     const string Owner = "izekiptenknoloji-bit", Repo = "izekip-shell";
 
     public static AppUpdateState State { get; private set; } = AppUpdateState.Unknown;
@@ -171,8 +171,10 @@ public static class AppUpdater
         Changed?.Invoke();
     }
 
-    // Guncel dosyalari calisan klasorun uzerine kopyalayan bir betik yazar, kabugu kapatir,
-    // betigi baslatir (kabuk tamamen cikinca dosyalar serbest kalir) ve exe'yi yeniden acar.
+    // Kendi exe'mizi ayri bir surecte "--guncelleme-tamamla" moduyla baslatir: o surec kucuk
+    // bir "Guncelleniyor" ekrani gosterip bu surec tamamen kapanana kadar bekler, dosyalari
+    // kopyalar, yeni surumu acar. Boylece kopyalama sirasinda ekranda tek o pencere kalir;
+    // tam kabuk (gorev cubugu, Baslat, masaustu...) o surede hic calismaz.
     public static void InstallAndRestart()
     {
         if (_stagedRoot is null) return;
@@ -184,25 +186,9 @@ public static class AppUpdater
 
         var installDir = AppContext.BaseDirectory.TrimEnd('\\');
         var exePath = Path.Combine(installDir, "IzekipShell.exe");
-        var scriptPath = AppPaths.File("guncelle.cmd");
-        File.WriteAllText(scriptPath, $"""
-            @echo off
-            :bekle
-            tasklist /fi "imagename eq IzekipShell.exe" | find /i "IzekipShell.exe" >nul
-            if not errorlevel 1 (
-                timeout /t 1 >nul
-                goto bekle
-            )
-            robocopy "{_stagedRoot}" "{installDir}" /E /IS /IT /R:5 /W:1 /NFL /NDL /NJH /NJS
-            start "" "{exePath}"
-            del "%~f0"
-            """);
-
-        Process.Start(new ProcessStartInfo("cmd.exe", $"/c \"{scriptPath}\"")
+        Process.Start(new ProcessStartInfo(exePath, $"--guncelleme-tamamla \"{_stagedRoot}\" \"{installDir}\"")
         {
             UseShellExecute = false,
-            CreateNoWindow = true,
-            WindowStyle = ProcessWindowStyle.Hidden,
         });
         App.Current.Quit();
     }

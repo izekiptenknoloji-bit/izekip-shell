@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using IzekipShell.Services;
 using IzekipShell.Views;
 using Microsoft.UI.Dispatching;
@@ -41,7 +42,8 @@ public partial class App : Application
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        var argv = Environment.GetCommandLineArgs().Skip(1).Select(a => a.ToLowerInvariant()).ToArray();
+        var rawArgv = Environment.GetCommandLineArgs().Skip(1).ToArray();
+        var argv = rawArgv.Select(a => a.ToLowerInvariant()).ToArray();
         if (argv.Contains("--kapat"))
         {
             if (EventWaitHandle.TryOpenExisting(QuitEvent, out var quit)) quit.Set();
@@ -55,6 +57,11 @@ public partial class App : Application
             Exit();
             return;
         }
+        if (argv.Length >= 3 && argv[0] == "--guncelleme-tamamla")
+        {
+            RunUpdateHelper(rawArgv[1], rawArgv[2]);
+            return;
+        }
 
         _single = new Mutex(true, "IzekipShell.TekKopya", out bool first);
         if (!first) { Exit(); return; }
@@ -65,6 +72,41 @@ public partial class App : Application
             AppPaths.Log(e);
             Quit();
         }
+    }
+
+    // OTA guncellemesi: eski surum tamamen kapanana kadar tek basina "Guncelleniyor" ekranini
+    // gosterir, sonra dosyalari kopyalayip yeni surumu acar. Tam kabuk burada hic calismaz.
+    void RunUpdateHelper(string stagedRoot, string installDir)
+    {
+        UI = DispatcherQueue.GetForCurrentThread();
+        var win = new UpdatingWindow();
+
+        var worker = new Thread(() =>
+        {
+            try
+            {
+                int myPid = Environment.ProcessId;
+                while (Process.GetProcessesByName("IzekipShell").Any(p => p.Id != myPid))
+                    Thread.Sleep(300);
+
+                win.SetStatus("Dosyalar kopyalanıyor…");
+                var robocopy = Process.Start(new ProcessStartInfo("robocopy.exe",
+                    $"\"{stagedRoot}\" \"{installDir}\" /E /IS /IT /R:5 /W:1 /NFL /NDL /NJH /NJS")
+                {
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                });
+                robocopy?.WaitForExit();
+
+                win.SetStatus("Yeniden başlatılıyor…");
+                Process.Start(new ProcessStartInfo(Path.Combine(installDir, "IzekipShell.exe")) { UseShellExecute = true });
+                Thread.Sleep(400);
+            }
+            catch (Exception e) { AppPaths.Log(e); }
+            finally { UI.TryEnqueue(Exit); }
+        }) { IsBackground = true };
+        worker.Start();
     }
 
     void Boot()
