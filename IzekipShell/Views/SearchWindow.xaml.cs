@@ -33,6 +33,7 @@ public sealed partial class SearchWindow : Window
     public SearchWindow()
     {
         InitializeComponent();
+        SystemTheme.Bind(Root);
         Title = "İzekip Arama";
         _popup = new PopupController(this, Root);
         _popup.Opened += OnOpened;

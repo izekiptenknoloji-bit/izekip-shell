@@ -15,6 +15,7 @@ public sealed partial class ClockWindow : Window
     public ClockWindow()
     {
         InitializeComponent();
+        SystemTheme.Bind(Root);
         Title = "İzekip Saat";
         _popup = new PopupController(this, Root);
         _popup.Opened += () =>

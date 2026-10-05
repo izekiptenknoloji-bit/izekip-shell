@@ -90,6 +90,7 @@ public partial class App : Application
             bar.ShowBar();
         }
         Taskbar = Taskbars[0];
+        SystemTheme.Watch(WindowHelper.Handle(Taskbar));
         StartMenu = new StartWindow();
         Panel = new PanelWindow();
         Search = new SearchWindow();

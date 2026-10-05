@@ -18,6 +18,7 @@ public sealed partial class PanelWindow : Window
     public PanelWindow()
     {
         InitializeComponent();
+        SystemTheme.Bind(Root);
         Title = "İzekip Denetim Merkezi";
         _popup = new PopupController(this, Root);
         _popup.Opened += () =>

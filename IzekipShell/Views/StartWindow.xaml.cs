@@ -57,6 +57,7 @@ public sealed partial class StartWindow : Window
     public StartWindow()
     {
         InitializeComponent();
+        SystemTheme.Bind(Root);
         Title = "İzekip Başlat";
         _popup = new PopupController(this, Root);
         _popup.Opened += OnOpened;

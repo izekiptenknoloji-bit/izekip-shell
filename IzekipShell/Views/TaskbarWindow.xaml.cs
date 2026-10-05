@@ -11,6 +11,8 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Animation;
 using Windows.Graphics;
 
 namespace IzekipShell.Views;
@@ -24,6 +26,8 @@ public sealed partial class TaskbarWindow : Window
 
     readonly ObservableCollection<TaskItem> _items = new();
     readonly Dictionary<IntPtr, long> _firstSeen = new();
+    readonly TranslateTransform _taskItemsOffset = new();
+    double _taskItemsTarget;
     readonly IntPtr _hwnd;
     readonly OverlappedPresenter _presenter;
     readonly DispatcherQueueTimer _poll, _clock;
@@ -42,6 +46,7 @@ public sealed partial class TaskbarWindow : Window
     {
         Monitor = monitor;
         InitializeComponent();
+        SystemTheme.Bind(Root);
         Title = "İzekip Görev Çubuğu";
         _hwnd = WindowHelper.Handle(this);
         _presenter = WindowHelper.MakeChrome(this, topmost: true);
@@ -49,6 +54,9 @@ public sealed partial class TaskbarWindow : Window
         Native.DwmSetWindowAttribute(_hwnd, 33, ref square, 4);
         SystemBackdrop = new AlwaysAcrylic(DesktopAcrylicKind.Base);
         TaskItems.ItemsSource = _items;
+        // Icerige gore boyutlanmasi icin sabit sola yasli: "ortalama" gorunumu RenderTransform ile kaydirilarak verilir.
+        TaskItems.HorizontalAlignment = HorizontalAlignment.Left;
+        TaskItems.RenderTransform = _taskItemsOffset;
 
         _poll = DispatcherQueue.CreateTimer();
         _poll.Interval = TimeSpan.FromMilliseconds(500);
@@ -186,8 +194,37 @@ public sealed partial class TaskbarWindow : Window
         if (Native.ProcessId(fg) != (uint)Environment.ProcessId) WindowTracker.LastActive = fg;
     }
 
+    // Windows'un "Gorev cubugu hizalamasi" ayarina uyar; sol<->orta gecisi yumusakca kayarak olur.
+    void ApplyAlignment()
+    {
+        double target = 0;
+        if (TaskbarAlignment.Center)
+        {
+            double colW = Root.ColumnDefinitions[1].ActualWidth;
+            double itemsW = TaskItems.ActualWidth;
+            if (colW > 0 && itemsW > 0) target = Math.Max(0, (colW - itemsW) / 2);
+        }
+        if (Math.Abs(target - _taskItemsTarget) < 0.5) return;
+        _taskItemsTarget = target;
+
+        var anim = new DoubleAnimation
+        {
+            To = target,
+            Duration = TimeSpan.FromMilliseconds(380),
+            EasingFunction = new ExponentialEase { EasingMode = EasingMode.EaseOut, Exponent = 6 },
+        };
+        Storyboard.SetTarget(anim, _taskItemsOffset);
+        Storyboard.SetTargetProperty(anim, "X");
+        var board = new Storyboard();
+        board.Children.Add(anim);
+        board.Begin();
+    }
+
     void Refresh()
     {
+        System.IO.File.AppendAllText(AppPaths.File("debug.log"), $"{DateTime.Now:HH:mm:ss} Center={TaskbarAlignment.Center}" + Environment.NewLine);
+        ApplyAlignment();
+
         var windows = WindowTracker.Enumerate();
         foreach (var w in windows) if (!_firstSeen.ContainsKey(w.Hwnd)) _firstSeen[w.Hwnd] = _seq++;
         foreach (var gone in _firstSeen.Keys.Where(h => windows.All(w => w.Hwnd != h)).ToList()) _firstSeen.Remove(gone);
